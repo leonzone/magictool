@@ -20,8 +20,11 @@ import android.view.WindowManager;
 import android.widget.FrameLayout;
 
 import com.reiser.magictool.R;
+import com.reiser.magictool.db.CacheDbHelper;
 import com.reiser.magictool.fragment.MainFragment;
 import com.reiser.magictool.fragment.MenuFragment;
+import com.reiser.magictool.fragment.NewsFragment;
+
 
 public class MainActivity extends AppCompatActivity {
     private FrameLayout fl_content;
@@ -32,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
     private String curId;
     private Toolbar toolbar;
     private boolean isLight;
-    //    private CacheDbHelper dbHelper;
+    private CacheDbHelper dbHelper;
     private SharedPreferences sp;
 
 
@@ -41,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         sp = PreferenceManager.getDefaultSharedPreferences(this);
-//        dbHelper = new CacheDbHelper(this, 1);
+        dbHelper = new CacheDbHelper(this, 1);
         isLight = sp.getBoolean("isLight", true);
         initView();
         loadLatest();
@@ -72,11 +75,13 @@ public class MainActivity extends AppCompatActivity {
                 android.R.color.holo_red_light);
 
         sr.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+
             @Override
             public void onRefresh() {
                 replaceFragment();
                 sr.setRefreshing(false);
             }
+
         });
         fl_content = (FrameLayout) findViewById(R.id.fl_content);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawerlayout);
@@ -87,13 +92,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void replaceFragment() {
-//        if (curId.equals("latest")) {
-//            getSupportFragmentManager().beginTransaction().setCustomAnimations(R.anim.slide_in_from_right, R.anim.slide_out_to_left)
-//                    .replace(R.id.fl_content,
-//                            new MainFragment(), "latest").commit();
-//        } else {
-//
-//        }
+        if (curId.equals("latest")) {
+            getSupportFragmentManager().beginTransaction().setCustomAnimations(R.anim.slide_in_from_right, R.anim.slide_out_to_left)
+                    .replace(R.id.fl_content,
+                            new MainFragment(), "latest").commit();
+        } else {
+
+        }
 
     }
 
@@ -123,15 +128,15 @@ public class MainActivity extends AppCompatActivity {
         if (id == R.id.action_mode) {
             isLight = !isLight;
             // TODO: 15-8-29 现在只有这个activity有夜间模式，打开日报详情还不是啊
-            item.setTitle(isLight ? "夜间模式" : "日间模式");
+            item.setTitle(isLight?"夜间模式":"日间模式");
             toolbar.setBackgroundColor(getResources().getColor(isLight ? R.color.light_toolbar : R.color.dark_toolbar));
             setStatusBarColor(getResources().getColor(isLight ? R.color.light_toolbar : R.color.dark_toolbar));
-//            if (curId.equals("latest")) {
-//                ((MainFragment) getSupportFragmentManager().findFragmentByTag("latest")).updateTheme();
-//            } else {
-//                ((NewsFragment) getSupportFragmentManager().findFragmentByTag("news")).updateTheme();
-//            }
-//            ((MenuFragment) getSupportFragmentManager().findFragmentById(R.id.menu_fragment)).updateTheme();
+            if (curId.equals("latest")) {
+                ((MainFragment) getSupportFragmentManager().findFragmentByTag("latest")).updateTheme();
+            } else {
+                ((NewsFragment) getSupportFragmentManager().findFragmentByTag("news")).updateTheme();
+            }
+            ((MenuFragment) getSupportFragmentManager().findFragmentById(R.id.menu_fragment)).updateTheme();
             sp.edit().putBoolean("isLight", isLight).apply();
         }
 
@@ -141,10 +146,10 @@ public class MainActivity extends AppCompatActivity {
     public boolean isLight() {
         return isLight;
     }
-//
-//    public CacheDbHelper getCacheDbHelper() {
-//        return dbHelper;
-//    }
+
+    public CacheDbHelper getCacheDbHelper() {
+        return dbHelper;
+    }
 
     @Override
     public void onBackPressed() {

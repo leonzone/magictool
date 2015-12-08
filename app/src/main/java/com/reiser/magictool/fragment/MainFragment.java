@@ -1,8 +1,11 @@
 package com.reiser.magictool.fragment;
 
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.design.widget.Snackbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +14,8 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.alibaba.fastjson.JSON;
+import com.loopj.android.http.TextHttpResponseHandler;
 import com.reiser.magictool.R;
 import com.reiser.magictool.activty.LatestContentActivity;
 import com.reiser.magictool.activty.MainActivity;
@@ -23,10 +28,11 @@ import com.reiser.magictool.util.HttpUtils;
 import com.reiser.magictool.util.PreUtils;
 import com.reiser.magictool.view.Kanner;
 
+import java.util.List;
 
-/**
- * Created by wwjun.wang on 2015/8/12.
- */
+import cz.msebera.android.httpclient.Header;
+
+
 public class MainFragment extends BaseFragment {
     private ListView lv_news;
     private MainNewsItemAdapter mAdapter;
@@ -53,7 +59,8 @@ public class MainFragment extends BaseFragment {
                 StoriesEntity storiesEntity = new StoriesEntity();
                 storiesEntity.setId(entity.getId());
                 storiesEntity.setTitle(entity.getTitle());
-                Intent intent = new Intent(mActivity, LatestContentActivity.class);
+                // FIXME: 2015/12/8
+                Intent intent = new Intent(mActivity, MainActivity.class);
                 intent.putExtra(Constant.START_LOCATION, startingLocation);
                 intent.putExtra("entity", storiesEntity);
                 intent.putExtra("isLight", ((MainActivity) mActivity).isLight());
@@ -120,111 +127,111 @@ public class MainFragment extends BaseFragment {
     private void loadFirst() {
         isLoading = true;
         if (HttpUtils.isNetworkConnected(mActivity)) {
-//            HttpUtils.get(Constant.LATESTNEWS, new TextHttpResponseHandler() {
-//                @Override
-//                public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
-//                }
-//
-//                @Override
-//                public void onSuccess(int statusCode, Header[] headers, String responseString) {
-//                    SQLiteDatabase db = ((MainActivity) mActivity).getCacheDbHelper().getWritableDatabase();
-//                    db.execSQL("replace into CacheList(date,json) values(" + Constant.LATEST_COLUMN + ",' " + responseString + "')");
-//                    db.close();
-//                    parseLatestJson(responseString);
-//                }
+            HttpUtils.get(Constant.LATESTNEWS, new TextHttpResponseHandler() {
+                @Override
+                public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
 
-//            });
+                }
+
+                @Override
+                public void onSuccess(int statusCode, Header[] headers, String responseString) {
+                    SQLiteDatabase db = ((MainActivity) mActivity).getCacheDbHelper().getWritableDatabase();
+                    db.execSQL("replace into CacheList(date,json) values(" + Constant.LATEST_COLUMN + ",' " + responseString + "')");
+                    db.close();
+                    parseLatestJson(responseString);
+                }
+
+
+            });
         } else {
-//            SQLiteDatabase db = ((MainActivity) mActivity).getCacheDbHelper().getReadableDatabase();
-//            Cursor cursor = db.rawQuery("select * from CacheList where date = " + Constant.LATEST_COLUMN, null);
-//            if (cursor.moveToFirst()) {
-//                String json = cursor.getString(cursor.getColumnIndex("json"));
-//                parseLatestJson(json);
-//            } else {
-//                isLoading = false;
-//            }
-//            cursor.close();
-//            db.close();
+            SQLiteDatabase db = ((MainActivity) mActivity).getCacheDbHelper().getReadableDatabase();
+            Cursor cursor = db.rawQuery("select * from CacheList where date = " + Constant.LATEST_COLUMN, null);
+            if (cursor.moveToFirst()) {
+                String json = cursor.getString(cursor.getColumnIndex("json"));
+                parseLatestJson(json);
+            } else {
+                isLoading = false;
+            }
+            cursor.close();
+            db.close();
         }
 
     }
 
     private void parseLatestJson(String responseString) {
-//        Gson gson = new Gson();
-//        latest = gson.fromJson(responseString, Latest.class);
-//        date = latest.getDate();
-//        kanner.setTopEntities(latest.getTop_stories());
-//        handler.post(new Runnable() {
-//            @Override
-//            public void run() {
-//                List<StoriesEntity> storiesEntities = latest.getStories();
-//                StoriesEntity topic = new StoriesEntity();
-//                topic.setType(Constant.TOPIC);
-//                topic.setTitle("今日热闻");
-//                storiesEntities.add(0, topic);
-//                mAdapter.addList(storiesEntities);
-//                isLoading = false;
-//            }
-//        });
+        latest = JSON.parseObject(responseString, Latest.class);
+        date = latest.getDate();
+        kanner.setTopEntities(latest.getTop_stories());
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                List<StoriesEntity> storiesEntities = latest.getStories();
+                StoriesEntity topic = new StoriesEntity();
+                topic.setType(Constant.TOPIC);
+                topic.setTitle("今日热闻");
+                storiesEntities.add(0, topic);
+                mAdapter.addList(storiesEntities);
+                isLoading = false;
+            }
+        });
     }
 
     private void loadMore(final String url) {
-//        isLoading = true;
-//        if (HttpUtils.isNetworkConnected(mActivity)) {
-//            HttpUtils.get(url, new TextHttpResponseHandler() {
-//                @Override
-//                public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
-//                }
-//
-//                @Override
-//                public void onSuccess(int statusCode, Header[] headers, String responseString) {
-////                    PreUtils.putStringTo(Constant.CACHE, mActivity, url, responseString);
-//                    SQLiteDatabase db = ((MainActivity) mActivity).getCacheDbHelper().getWritableDatabase();
-//                    db.execSQL("replace into CacheList(date,json) values(" + date + ",' " + responseString + "')");
-//                    db.close();
-//                    parseBeforeJson(responseString);
-//
-//                }
-//
-//            });
-//        } else {
-//            SQLiteDatabase db = ((MainActivity) mActivity).getCacheDbHelper().getReadableDatabase();
-//            Cursor cursor = db.rawQuery("select * from CacheList where date = " + date, null);
-//            if (cursor.moveToFirst()) {
-//                String json = cursor.getString(cursor.getColumnIndex("json"));
-//                parseBeforeJson(json);
-//            } else {
-//                db.delete("CacheList", "date < " + date, null);
-//                isLoading = false;
-//                Snackbar sb = Snackbar.make(lv_news, "没有更多的离线内容了~", Snackbar.LENGTH_SHORT);
-//                sb.getView().setBackgroundColor(getResources().getColor(((MainActivity) mActivity).isLight() ? android.R.color.holo_blue_dark : android.R.color.black));
-//                sb.show();
-//            }
-//            cursor.close();
-//            db.close();
-//        }
+        isLoading = true;
+        if (HttpUtils.isNetworkConnected(mActivity)) {
+            HttpUtils.get(url, new TextHttpResponseHandler() {
+                @Override
+                public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+                }
+
+                @Override
+                public void onSuccess(int statusCode, Header[] headers, String responseString) {
+//                    PreUtils.putStringTo(Constant.CACHE, mActivity, url, responseString);
+                    SQLiteDatabase db = ((MainActivity) mActivity).getCacheDbHelper().getWritableDatabase();
+                    db.execSQL("replace into CacheList(date,json) values(" + date + ",' " + responseString + "')");
+                    db.close();
+                    parseBeforeJson(responseString);
+
+                }
+
+            });
+        } else {
+            SQLiteDatabase db = ((MainActivity) mActivity).getCacheDbHelper().getReadableDatabase();
+            Cursor cursor = db.rawQuery("select * from CacheList where date = " + date, null);
+            if (cursor.moveToFirst()) {
+                String json = cursor.getString(cursor.getColumnIndex("json"));
+                parseBeforeJson(json);
+            } else {
+                db.delete("CacheList", "date < " + date, null);
+                isLoading = false;
+                Snackbar sb = Snackbar.make(lv_news, "没有更多的离线内容了~", Snackbar.LENGTH_SHORT);
+                sb.getView().setBackgroundColor(getResources().getColor(((MainActivity) mActivity).isLight() ? android.R.color.holo_blue_dark : android.R.color.black));
+                sb.show();
+            }
+            cursor.close();
+            db.close();
+        }
     }
 
     private void parseBeforeJson(String responseString) {
-//        Gson gson = new Gson();
-//        before = gson.fromJson(responseString, Before.class);
-//        if (before == null) {
-//            isLoading = false;
-//            return;
-//        }
-//        date = before.getDate();
-//        handler.post(new Runnable() {
-//            @Override
-//            public void run() {
-//                List<StoriesEntity> storiesEntities = before.getStories();
-//                StoriesEntity topic = new StoriesEntity();
-//                topic.setType(Constant.TOPIC);
-//                topic.setTitle(convertDate(date));
-//                storiesEntities.add(0, topic);
-//                mAdapter.addList(storiesEntities);
-//                isLoading = false;
-//            }
-//        });
+        before = JSON.parseObject(responseString, Before.class);
+        if (before == null) {
+            isLoading = false;
+            return;
+        }
+        date = before.getDate();
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                List<StoriesEntity> storiesEntities = before.getStories();
+                StoriesEntity topic = new StoriesEntity();
+                topic.setType(Constant.TOPIC);
+                topic.setTitle(convertDate(date));
+                storiesEntities.add(0, topic);
+                mAdapter.addList(storiesEntities);
+                isLoading = false;
+            }
+        });
     }
 
     @Override

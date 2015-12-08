@@ -29,6 +29,7 @@
     </android.support.v4.widget.SwipeRefreshLayout>
 
     <fragment
+        android:id="@+id/menu_fragment"
         android:name="com.reiser.magictool.fragment.MenuFragment"
         android:layout_width="300dp"
         android:layout_height="match_parent"
