@@ -19,7 +19,7 @@ import com.loopj.android.http.TextHttpResponseHandler;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.reiser.magictool.R;
-import com.reiser.magictool.activty.MainActivity;
+import com.reiser.magictool.activity.MainActivity;
 import com.reiser.magictool.adapter.NewsItemAdapter;
 import com.reiser.magictool.model.News;
 import com.reiser.magictool.model.StoriesEntity;
@@ -126,6 +126,7 @@ public class NewsFragment extends BaseFragment {
                 @Override
                 public void onSuccess(int statusCode, cz.msebera.android.httpclient.Header[] headers, String responseString) {
                     SQLiteDatabase db = ((MainActivity) mActivity).getCacheDbHelper().getWritableDatabase();
+
                     db.execSQL("replace into CacheList(date,json) values(" + (Constant.BASE_COLUMN + Integer.parseInt(urlId)) + ",' " + responseString + "')");
                     db.close();
                     parseJson(responseString);

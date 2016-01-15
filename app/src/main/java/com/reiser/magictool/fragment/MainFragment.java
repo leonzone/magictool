@@ -1,24 +1,31 @@
 package com.reiser.magictool.fragment;
 
+import android.animation.Animator;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.Snackbar;
+import android.support.v7.graphics.Palette;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import com.alibaba.fastjson.JSON;
 import com.loopj.android.http.TextHttpResponseHandler;
 import com.reiser.magictool.R;
-import com.reiser.magictool.activty.LatestContentActivity;
-import com.reiser.magictool.activty.MainActivity;
+import com.reiser.magictool.activity.LatestContentActivity;
+import com.reiser.magictool.activity.MainActivity;
 import com.reiser.magictool.adapter.MainNewsItemAdapter;
 import com.reiser.magictool.model.Before;
 import com.reiser.magictool.model.Latest;
@@ -93,35 +100,69 @@ public class MainFragment extends BaseFragment {
         lv_news.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
                 int[] startingLocation = new int[2];
                 view.getLocationOnScreen(startingLocation);
                 startingLocation[0] += view.getWidth() / 2;
                 StoriesEntity entity = (StoriesEntity) parent.getAdapter().getItem(position);
-                Intent intent = new Intent(mActivity, LatestContentActivity.class);
-                intent.putExtra(Constant.START_LOCATION, startingLocation);
-                intent.putExtra("entity", entity);
-                intent.putExtra("isLight", ((MainActivity) mActivity).isLight());
-                String readSequence = PreUtils.getStringFromDefault(mActivity, "read", "");
-                String[] splits = readSequence.split(",");
-                StringBuffer sb = new StringBuffer();
-                if (splits.length >= 200) {
-                    for (int i = 100; i < splits.length; i++) {
-                        sb.append(splits[i] + ",");
+                if (entity != null) {
+                    intent = new Intent(mActivity, LatestContentActivity.class);
+                    intent.putExtra(Constant.START_LOCATION, startingLocation);
+                    intent.putExtra("entity", entity);
+                    intent.putExtra("isLight", ((MainActivity) mActivity).isLight());
+                    String readSequence = PreUtils.getStringFromDefault(mActivity, "read", "");
+                    String[] splits = readSequence.split(",");
+                    StringBuffer sb = new StringBuffer();
+                    if (splits.length >= 200) {
+                        for (int i = 100; i < splits.length; i++) {
+                            sb.append(splits[i] + ",");
+                        }
+                        readSequence = sb.toString();
                     }
-                    readSequence = sb.toString();
-                }
 
-                if (!readSequence.contains(entity.getId() + "")) {
-                    readSequence = readSequence + entity.getId() + ",";
+                    if (!readSequence.contains(entity.getId() + "")) {
+                        readSequence = readSequence + entity.getId() + ",";
+                    }
+                    PreUtils.putStringToDefault(mActivity, "read", readSequence);
+                    TextView tv_title = (TextView) view.findViewById(R.id.tv_title);
+                    tv_title.setTextColor(getResources().getColor(R.color.clicked_tv_textcolor));
+                    ImageView iv_title = (ImageView) view.findViewById(R.id.iv_title);
+//                    getImageViewColor(iv_title);
+//                    intent.putExtra("color", mColor);
+                    startActivity(intent);
+                    mActivity.overridePendingTransition(0, 0);
                 }
-                PreUtils.putStringToDefault(mActivity, "read", readSequence);
-                TextView tv_title = (TextView) view.findViewById(R.id.tv_title);
-                tv_title.setTextColor(getResources().getColor(R.color.clicked_tv_textcolor));
+            }
+        });
+        return view;
+    }
+
+    Intent intent;
+    int mColor;
+
+    private void getImageViewColor(ImageView iv_title) {
+        BitmapDrawable drawable = (BitmapDrawable) iv_title.getDrawable();
+        Bitmap bitmap = drawable.getBitmap();
+        final int[] color = {Color.WHITE};
+        Palette.from(bitmap).generate(new Palette.PaletteAsyncListener() {
+            @Override
+            public void onGenerated(Palette palette) {
+                Palette.Swatch swatch = palette.getMutedSwatch();
+//                Palette.Swatch swatch = palette.getVibrantSwatch();
+//                Palette.Swatch swatch = palette.getDarkMutedSwatch();
+//                Palette.Swatch swatch = palette.getDarkVibrantSwatch();
+//                Palette.Swatch swatch = palette.getLightMutedSwatch();
+//                Palette.Swatch swatch = palette.getLightVibrantSwatch();
+                if (swatch != null) {
+                    intent.putExtra("color", swatch.getRgb());
+                } else {
+                    Log.e("smallsoho", "swatch为空");
+                }
                 startActivity(intent);
                 mActivity.overridePendingTransition(0, 0);
             }
         });
-        return view;
+//        return color[0];
     }
 
     private void loadFirst() {
@@ -213,6 +254,7 @@ public class MainFragment extends BaseFragment {
         }
     }
 
+
     private void parseBeforeJson(String responseString) {
         before = JSON.parseObject(responseString, Before.class);
         if (before == null) {
@@ -252,5 +294,10 @@ public class MainFragment extends BaseFragment {
 
     public void updateTheme() {
         mAdapter.updateTheme();
+
+
     }
+
+    private Animator mCurrentAnimator;
+
 }

@@ -1,6 +1,7 @@
-package com.reiser.magictool.activty;
+package com.reiser.magictool.activity;
 
 import android.annotation.TargetApi;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
@@ -128,7 +129,7 @@ public class MainActivity extends AppCompatActivity {
         if (id == R.id.action_mode) {
             isLight = !isLight;
             // TODO: 15-8-29 现在只有这个activity有夜间模式，打开日报详情还不是啊
-            item.setTitle(isLight?"夜间模式":"日间模式");
+            item.setTitle(isLight ? "夜间模式" : "日间模式");
             toolbar.setBackgroundColor(getResources().getColor(isLight ? R.color.light_toolbar : R.color.dark_toolbar));
             setStatusBarColor(getResources().getColor(isLight ? R.color.light_toolbar : R.color.dark_toolbar));
             if (curId.equals("latest")) {
@@ -138,6 +139,8 @@ public class MainActivity extends AppCompatActivity {
             }
             ((MenuFragment) getSupportFragmentManager().findFragmentById(R.id.menu_fragment)).updateTheme();
             sp.edit().putBoolean("isLight", isLight).apply();
+        } else if (id == R.id.action_more) {
+            startActivity(new Intent(this, MoreActivity.class));
         }
 
         return super.onOptionsItemSelected(item);

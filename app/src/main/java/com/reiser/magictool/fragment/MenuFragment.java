@@ -14,7 +14,7 @@ import android.widget.TextView;
 
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.reiser.magictool.R;
-import com.reiser.magictool.activty.MainActivity;
+import com.reiser.magictool.activity.MainActivity;
 import com.reiser.magictool.model.NewsListItem;
 import com.reiser.magictool.util.Constant;
 import com.reiser.magictool.util.HttpUtils;

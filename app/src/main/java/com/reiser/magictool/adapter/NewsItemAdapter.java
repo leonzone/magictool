@@ -13,7 +13,7 @@ import android.widget.TextView;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.reiser.magictool.R;
-import com.reiser.magictool.activty.MainActivity;
+import com.reiser.magictool.activity.MainActivity;
 import com.reiser.magictool.model.StoriesEntity;
 import com.reiser.magictool.util.PreUtils;
 
