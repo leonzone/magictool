@@ -22,15 +22,7 @@ public class ReiserApplication extends Application {
     private void initImageLoader(Context context) {
 
         File cacheDir = StorageUtils.getCacheDirectory(context);
-/*        ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(
-                context).threadPoolSize(3)
-                .threadPriority(Thread.NORM_PRIORITY - 2)
-                .memoryCache(new LruMemoryCache(2 * 1024 * 1024))
-                .denyCacheImageMultipleSizesInMemory()
-                .diskCacheFileNameGenerator(new Md5FileNameGenerator())
-                .tasksProcessingOrder(QueueProcessingType.LIFO)
-                .diskCache(new UnlimitedDiskCache(cacheDir)).writeDebugLogs()
-                .build();*/
+          int a=0;
         ImageLoaderConfiguration config = ImageLoaderConfiguration.createDefault(context);
         ImageLoader.getInstance().init(config);
     }
